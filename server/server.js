@@ -1,7 +1,7 @@
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
-require('dotenv').config();
+const express = require("express");
+const cors = require("cors");
+const mongoose = require("mongoose");
+require("dotenv").config();
 
 const app = express();
 
@@ -9,12 +9,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Connect to MongoDB only once (vercel optimization)
+// ✅ Connect to MongoDB (optimized for Vercel)
 if (!mongoose.connection.readyState) {
   mongoose
     .connect(process.env.MONGODB_URI)
     .then(() => console.log("✅ MongoDB Connected"))
-    .catch((err) => console.error("❌ MongoDB Error:", err));
+    .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 }
 
 // ✅ User Schema
@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
   username: String,
   password: String,
   role: { type: String, enum: ["student", "faculty"] },
-  batch: String
+  batch: String,
 });
 const User = mongoose.model("User", userSchema);
 
@@ -35,7 +35,7 @@ const projectSchema = new mongoose.Schema({
 });
 const Project = mongoose.model("Project", projectSchema);
 
-// ✅ Login API
+// ✅ Login API (Main)
 app.post("/api/login", async (req, res) => {
   const { username, password, role, batch } = req.body;
 
@@ -43,7 +43,9 @@ app.post("/api/login", async (req, res) => {
     const user = await User.findOne({ username, role });
 
     if (!user || user.password !== password) {
-      return res.status(401).json({ success: false, message: "Invalid credentials." });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials." });
     }
 
     if (role === "student" && user.batch && user.batch !== batch) {
@@ -55,10 +57,15 @@ app.post("/api/login", async (req, res) => {
       message: `${role} Login Success`,
       user: { username, role, batch: user.batch || null },
     });
-
   } catch (err) {
     res.status(500).json({ success: false, message: "Login error", err });
   }
+});
+
+// ✅ Alias for backward compatibility (/student/login)
+app.post("/student/login", (req, res) => {
+  req.url = "/api/login";
+  app._router.handle(req, res);
 });
 
 // ✅ Get All Projects
@@ -101,5 +108,10 @@ app.put("/api/projects/:id", async (req, res) => {
   }
 });
 
-// ✅ Export App for Vercel Serverless Functions
+// ✅ Health check (helps test deployment)
+app.get("/", (req, res) => {
+  res.send("✅ Backend running on Vercel");
+});
+
+// ✅ Export for Vercel serverless function
 module.exports = app;
