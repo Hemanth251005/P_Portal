@@ -18,29 +18,28 @@ function App() {
 
   const handleLogin = async (credentials) => {
     try {
-      const baseURL = "https://project-backend-khaki.vercel.app"; // ✅ backend deployed URL
+      const baseURL = "https://project-backend-khaki.vercel.app"; // ✅ correct backend
 
-      const endpoint =
-        credentials.role === "student"
-          ? "/student/login"
-          : "/faculty/login";
-
-      const response = await axios.post(`${baseURL}${endpoint}`, credentials, {
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await axios.post(
+        `${baseURL}/api/login`,
+        credentials,
+        { headers: { "Content-Type": "application/json" } }
+      );
 
       if (response.data.success) {
-        localStorage.setItem("role", credentials.role);
-        localStorage.setItem("username", credentials.username);
+        const { username, role, batch } = response.data.user;
 
-        if (credentials.role === "student") {
-          localStorage.setItem("batch", credentials.batch);
+        localStorage.setItem("role", role);
+        localStorage.setItem("username", username);
+
+        if (role === "student" && batch) {
+          localStorage.setItem("batch", batch);
         }
 
         setIsLoggedIn(true);
         alert(response.data.message);
 
-        window.location.href = "/projects";
+        window.location.href = "/projects"; // ✅ redirect after success
       } else {
         alert(response.data.message);
       }
