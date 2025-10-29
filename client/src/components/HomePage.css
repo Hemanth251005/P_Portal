@@ -1,0 +1,38 @@
+/* In src/components/HomePage.css */
+
+.home-hero {
+  position: relative;
+  height: 100vh; /* This sets the container height to 100% of the viewport height */
+  width: 100vw;  /* This sets the container width to 100% of the viewport width */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.home-hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-image: url('../assets/homee.jpg');
+  background-size: cover; /* This makes the image fill the container while maintaining its aspect ratio */
+  background-position: center;
+  filter: blur(8px);
+  z-index: 0;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  color: #2d6bc3;
+  text-align: center;
+  padding: 20px;
+}
+
+.hero-content h2 {
+  font-size: 3rem;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+}

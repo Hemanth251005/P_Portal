@@ -1,0 +1,72 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 30px;
+  background: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo-background .college-logo {
+  height: 50px;
+   border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nav-bar {
+  display: flex;
+  gap: 15px; /* space between buttons */
+}
+
+.nav-bar a,
+.nav-bar button {
+ margin-left: 15px;
+    padding: 10px 20px;
+    background: #2575fc;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.nav-bar a:hover,
+.nav-bar button:hover {
+  background-color: #357abd;
+}
+
+.logout-btn {
+  background-color: #e74c3c;
+}
+.logout-btn:hover {
+  background-color: #c0392b;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .page-header {
+    padding: 10px 15px;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nav-bar {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .logo-background .college-logo {
+    height: 40px;
+  }
+
+  .nav-bar a,
+  .nav-bar button {
+     padding: 10px 20px;
+    font-size: 13px;
+  }
+}
