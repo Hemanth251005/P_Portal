@@ -5,34 +5,33 @@ require("dotenv").config();
 
 const app = express();
 
-// ✅ Fix CORS (explicitly allow frontend origin)
-app.use(
-  cors({
-    origin: [ // ✅ your deployed frontend
-      "https://p-portal-e8v5.vercel.app", // ✅ additional deployed frontend
-      "http://localhost:3000"             // ✅ local development
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type"],
-    credentials: true,
-  })
-);
+// ✅ CORS — must be on top
+app.use(cors({
+  origin: [
+    "https://p-portal-e8v5.vercel.app", // your deployed frontend
+    "http://localhost:3000"             // local development
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
+}));
 
-// ✅ Handle preflight requests explicitly
+// ✅ Handle preflight requests (important for CORS)
 app.options("*", cors());
 
-// Middleware
+// ✅ Middleware
 app.use(express.json());
 
-// ✅ Connect to MongoDB (optimized for Vercel)
+// ✅ MongoDB Connection (only connect if not already)
 if (!mongoose.connection.readyState) {
-  mongoose
-    .connect(process.env.MONGODB_URI)
-    .then(() => console.log("✅ MongoDB Connected"))
-    .catch((err) => console.error("❌ MongoDB Connection Error:", err));
+  mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 }
 
-// ✅ User Schema
+// ✅ Schemas
 const userSchema = new mongoose.Schema({
   username: String,
   password: String,
@@ -41,7 +40,6 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model("User", userSchema);
 
-// ✅ Project Schema
 const projectSchema = new mongoose.Schema({
   batch: String,
   projectLink: String,
@@ -50,7 +48,17 @@ const projectSchema = new mongoose.Schema({
 });
 const Project = mongoose.model("Project", projectSchema);
 
-// ✅ Login API (Main)
+// ✅ Test Route — for CORS + health
+app.get("/api/test", (req, res) => {
+  res.json({ message: "✅ CORS and backend working fine!" });
+});
+
+// ✅ Health check
+app.get("/", (req, res) => {
+  res.send("✅ Backend running on Vercel");
+});
+
+// ✅ Login API
 app.post("/api/login", async (req, res) => {
   const { username, password, role, batch } = req.body;
 
@@ -58,9 +66,7 @@ app.post("/api/login", async (req, res) => {
     const user = await User.findOne({ username, role });
 
     if (!user || user.password !== password) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid credentials." });
+      return res.status(401).json({ success: false, message: "Invalid credentials." });
     }
 
     if (role === "student" && user.batch && user.batch !== batch) {
@@ -73,17 +79,12 @@ app.post("/api/login", async (req, res) => {
       user: { username, role, batch: user.batch || null },
     });
   } catch (err) {
+    console.error("❌ Login Error:", err);
     res.status(500).json({ success: false, message: "Login error", err });
   }
 });
 
-// ✅ Alias for backward compatibility (/student/login)
-app.post("/student/login", (req, res) => {
-  req.url = "/api/login";
-  app._router.handle(req, res);
-});
-
-// ✅ Get All Projects
+// ✅ Projects API
 app.get("/api/projects", async (req, res) => {
   try {
     const projects = await Project.find();
@@ -93,7 +94,6 @@ app.get("/api/projects", async (req, res) => {
   }
 });
 
-// ✅ Add Project
 app.post("/api/projects", async (req, res) => {
   const { batch, projectLink } = req.body;
 
@@ -109,7 +109,6 @@ app.post("/api/projects", async (req, res) => {
   }
 });
 
-// ✅ Update Project Marks
 app.put("/api/projects/:id", async (req, res) => {
   try {
     const updated = await Project.findByIdAndUpdate(
@@ -123,9 +122,11 @@ app.put("/api/projects/:id", async (req, res) => {
   }
 });
 
-// ✅ Health check
-app.get("/", (req, res) => {
-  res.send("✅ Backend running on Vercel");
+// ✅ Fallback route for student login alias
+app.post("/student/login", (req, res) => {
+  req.url = "/api/login";
+  app._router.handle(req, res);
 });
 
+// ✅ Export app for Vercel (do NOT app.listen here)
 module.exports = app;
