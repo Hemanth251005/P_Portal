@@ -8,9 +8,9 @@ const app = express();
 // ✅ Fix CORS (explicitly allow frontend origin)
 app.use(
   cors({
-    origin: [
-      "https://p-portal-e8v5.vercel.app", // ✅ your deployed frontend
-      "http://localhost:5173"             // ✅ local development (optional)
+    origin: [ // ✅ your deployed frontend
+      "https://p-portal-e8v5.vercel.app", // ✅ additional deployed frontend
+      "http://localhost:3000"             // ✅ local development
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type"],

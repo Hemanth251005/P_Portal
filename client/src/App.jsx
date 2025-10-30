@@ -74,7 +74,7 @@ function App() {
             path="/login"
             element={
               <>
-                <LoginHeader />
+                <LoginHeader onLogoutClick={handleLogout} />
                 <LoginForm onLogin={handleLogin} />
               </>
             }
