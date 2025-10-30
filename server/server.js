@@ -5,8 +5,23 @@ require("dotenv").config();
 
 const app = express();
 
+// ✅ Fix CORS (explicitly allow frontend origin)
+app.use(
+  cors({
+    origin: [
+      "https://p-portal-e8v5.vercel.app", // ✅ your deployed frontend
+      "http://localhost:5173"             // ✅ local development (optional)
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
+    credentials: true,
+  })
+);
+
+// ✅ Handle preflight requests explicitly
+app.options("*", cors());
+
 // Middleware
-app.use(cors());
 app.use(express.json());
 
 // ✅ Connect to MongoDB (optimized for Vercel)
@@ -108,10 +123,9 @@ app.put("/api/projects/:id", async (req, res) => {
   }
 });
 
-// ✅ Health check (helps test deployment)
+// ✅ Health check
 app.get("/", (req, res) => {
   res.send("✅ Backend running on Vercel");
 });
 
-// ✅ Export for Vercel serverless function
 module.exports = app;
