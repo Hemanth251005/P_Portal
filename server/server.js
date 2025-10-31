@@ -128,5 +128,13 @@ app.post("/student/login", (req, res) => {
   app._router.handle(req, res);
 });
 
+// ✅ Start server for local development
+const port = process.env.PORT || 5000;
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
+
 // ✅ Export app for Vercel (do NOT app.listen here)
 module.exports = app;

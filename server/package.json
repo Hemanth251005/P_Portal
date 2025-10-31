@@ -2,11 +2,11 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "Backend server for project portal",
-  "main": "api/server.js",
+  "main": "server.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node api/server.js",
-    "dev": "nodemon api/server.js",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
     "vercel-build": "echo 'No build step required'"
   },
   "dependencies": {
