@@ -5,31 +5,23 @@ require("dotenv").config();
 
 const app = express();
 
-// ✅ CORS — must be on top
+// ✅ CORS Configuration
 app.use(cors({
-  origin: [
-    "https://p-portal-e8v5.vercel.app", // your deployed frontend
-    "http://localhost:3000"             // local development
-  ],
+  origin: "http://localhost:3000",
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type"],
 }));
 
-// ✅ Handle preflight requests (important for CORS)
+// ✅ Handle preflight requests
 app.options("*", cors());
 
 // ✅ Middleware
 app.use(express.json());
 
-// ✅ MongoDB Connection (only connect if not already)
-if (!mongoose.connection.readyState) {
-  mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+// ✅ MongoDB Connection
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB Connection Error:", err));
-}
 
 // ✅ Schemas
 const userSchema = new mongoose.Schema({
@@ -48,23 +40,23 @@ const projectSchema = new mongoose.Schema({
 });
 const Project = mongoose.model("Project", projectSchema);
 
-// ✅ Test Route — for CORS + health
+// ✅ Test Route
 app.get("/api/test", (req, res) => {
   res.json({ message: "✅ CORS and backend working fine!" });
 });
 
-// ✅ Health check
+// ✅ Health Check
 app.get("/", (req, res) => {
-  res.send("✅ Backend running on Vercel");
+  res.send("✅ Backend running locally on port 5000");
 });
 
 // ✅ Login API
 app.post("/api/login", async (req, res) => {
   const { username, password, role, batch } = req.body;
+  console.log("Login attempt:", { username, role, batch });
 
   try {
     const user = await User.findOne({ username, role });
-
     if (!user || user.password !== password) {
       return res.status(401).json({ success: false, message: "Invalid credentials." });
     }
@@ -80,7 +72,7 @@ app.post("/api/login", async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Login Error:", err);
-    res.status(500).json({ success: false, message: "Login error", err });
+    res.status(500).json({ success: false, message: "Login error", err: err.message });
   }
 });
 
@@ -96,7 +88,6 @@ app.get("/api/projects", async (req, res) => {
 
 app.post("/api/projects", async (req, res) => {
   const { batch, projectLink } = req.body;
-
   if (!batch || !projectLink) {
     return res.status(400).json({ message: "Batch & Project link required" });
   }
@@ -122,19 +113,14 @@ app.put("/api/projects/:id", async (req, res) => {
   }
 });
 
-// ✅ Fallback route for student login alias
+// ✅ Student login alias
 app.post("/student/login", (req, res) => {
   req.url = "/api/login";
   app._router.handle(req, res);
 });
 
-// ✅ Start server for local development
-const port = process.env.PORT || 5000;
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-  });
-}
-
-// ✅ Export app for Vercel (do NOT app.listen here)
-module.exports = app;
+// ✅ Start the Server (local only)
+const port = 5000;
+app.listen(port, () => {
+  console.log(`🚀 Server running on port ${port}`);
+});
