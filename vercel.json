@@ -14,7 +14,11 @@
   "routes": [
     {
       "src": "/api/(.*)",
+<<<<<<< HEAD
       "dest": "/server/server.js"
+=======
+      "dest": "server/server.js"
+>>>>>>> 08d7d2ca440780c14376fc0b3a0dd3860025e281
     },
     {
       "src": "/(.*)",
